@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Do You Love Me? 😼💕</title>
+  <meta name="description" content="A special, romantic interactive question just for you!">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient romantic background floating elements -->
+  <div class="ambient-background">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+    <canvas id="ambientCanvas"></canvas>
+  </div>
+
+  <!-- Top Navigation / Controls Bar -->
+  <header class="top-bar">
+    <!-- Life Counter -->
+    <div class="lives-card" id="livesCard" title="Remaining chances to say No">
+      <span class="lives-label">Chances:</span>
+      <div class="hearts-wrapper">
+        <span class="life-heart alive" id="heart1" aria-label="Heart 1">❤️</span>
+        <span class="life-heart alive" id="heart2" aria-label="Heart 2">❤️</span>
+      </div>
+    </div>
+
+    <!-- Quick action buttons -->
+    <div class="top-actions">
+      <button class="icon-btn" id="customizerBtn" title="Customize names and letter" aria-label="Customize">
+        <span>✏️</span>
+      </button>
+      <button class="icon-btn" id="musicBtn" title="Toggle romantic audio" aria-label="Toggle sound">
+        <span id="soundIcon">🔊</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Proposal Container -->
+  <main class="main-container" id="mainContainer">
+    <div class="proposal-card glass-panel" id="proposalCard">
+      
+      <!-- Interactive Reactive Cat Mascot -->
+      <div class="mascot-container" id="mascotContainer">
+        <div class="cat-wrapper" id="catWrapper">
+          <svg class="cat-svg" viewBox="0 0 200 200" id="catSvg">
+            <!-- Cat Shadow -->
+            <ellipse cx="100" cy="185" rx="55" ry="12" fill="rgba(255, 120, 160, 0.25)" />
+            
+            <!-- Cat Body -->
+            <path d="M 60,180 C 45,150 45,115 65,95 C 75,85 125,85 135,95 C 155,115 155,150 140,180 Z" fill="#FFF5F7" stroke="#FFB6C1" stroke-width="4"/>
+            
+            <!-- Tail -->
+            <path id="catTail" class="cat-tail" d="M 135,160 Q 175,155 170,120 Q 165,100 150,110" fill="none" stroke="#FFB6C1" stroke-width="8" stroke-linecap="round"/>
+            
+            <!-- Cat Ears -->
+            <!-- Left Ear -->
+            <polygon id="catLeftEar" class="cat-ear" points="62,95 42,40 90,70" fill="#FFF5F7" stroke="#FFB6C1" stroke-width="4" stroke-linejoin="round"/>
+            <polygon points="63,85 52,50 82,68" fill="#FFB6C1"/>
+            
+            <!-- Right Ear -->
+            <polygon id="catRightEar" class="cat-ear" points="138,95 158,40 110,70" fill="#FFF5F7" stroke="#FFB6C1" stroke-width="4" stroke-linejoin="round"/>
+            <polygon points="137,85 148,50 118,68" fill="#FFB6C1"/>
+            
+            <!-- Cat Head -->
+            <circle cx="100" cy="100" r="48" fill="#FFFFFF" stroke="#FFB6C1" stroke-width="4"/>
+            
+            <!-- Cheeks / Blush -->
+            <ellipse class="blush" cx="72" cy="115" rx="10" ry="6" fill="#FF8DA1" opacity="0.6"/>
+            <ellipse class="blush" cx="128" cy="115" rx="10" ry="6" fill="#FF8DA1" opacity="0.6"/>
+            
+            <!-- Eyes (Reactive) -->
+            <g id="catEyesNormal">
+              <!-- Left Eye -->
+              <ellipse cx="80" cy="96" rx="6" ry="8" fill="#3D2B2E"/>
+              <circle cx="82" cy="93" r="2.5" fill="#FFFFFF"/>
+              <!-- Right Eye -->
+              <ellipse cx="120" cy="96" rx="6" ry="8" fill="#3D2B2E"/>
+              <circle cx="122" cy="93" r="2.5" fill="#FFFFFF"/>
+            </g>
+
+            <!-- Eyes Pleading (🥺 state) -->
+            <g id="catEyesPleading" style="display: none;">
+              <ellipse cx="80" cy="96" rx="9" ry="11" fill="#3D2B2E"/>
+              <circle cx="78" cy="92" r="4" fill="#FFFFFF"/>
+              <circle cx="83" cy="101" r="2" fill="#FFFFFF"/>
+              <ellipse cx="120" cy="96" rx="9" ry="11" fill="#3D2B2E"/>
+              <circle cx="118" cy="92" r="4" fill="#FFFFFF"/>
+              <circle cx="123" cy="101" r="2" fill="#FFFFFF"/>
+              <!-- Teardrop -->
+              <path d="M 68,105 Q 65,112 68,116 Q 71,112 68,105 Z" fill="#66B3FF" class="teardrop"/>
+            </g>
+
+            <!-- Eyes Shocked (🙀 state) -->
+            <g id="catEyesShocked" style="display: none;">
+              <circle cx="78" cy="95" r="9" fill="none" stroke="#3D2B2E" stroke-width="3"/>
+              <circle cx="78" cy="95" r="3" fill="#3D2B2E"/>
+              <circle cx="122" cy="95" r="9" fill="none" stroke="#3D2B2E" stroke-width="3"/>
+              <circle cx="122" cy="95" r="3" fill="#3D2B2E"/>
+            </g>
+
+            <!-- Eyes In Love (😻 state) -->
+            <g id="catEyesLove" style="display: none;">
+              <!-- Left Heart Eye -->
+              <path d="M 75,90 C 72,83 63,85 63,92 C 63,101 75,108 75,108 C 75,108 87,101 87,92 C 87,85 78,83 75,90 Z" fill="#FF477E"/>
+              <!-- Right Heart Eye -->
+              <path d="M 125,90 C 122,83 113,85 113,92 C 113,101 125,108 125,108 C 125,108 137,101 137,92 C 137,85 128,83 125,90 Z" fill="#FF477E"/>
+            </g>
+            
+            <!-- Cute Nose -->
+            <polygon points="97,104 103,104 100,107" fill="#FF7096"/>
+            
+            <!-- Mouth (Reactive) -->
+            <path id="catMouth" d="M 94,108 Q 100,113 100,111 Q 100,113 106,108" fill="none" stroke="#3D2B2E" stroke-width="2.5" stroke-linecap="round"/>
+            
+            <!-- Whiskers -->
+            <line x1="55" y1="102" x2="35" y2="99" stroke="#FFB6C1" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="55" y1="109" x2="35" y2="114" stroke="#FFB6C1" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="145" y1="102" x2="165" y2="99" stroke="#FFB6C1" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="145" y1="109" x2="165" y2="114" stroke="#FFB6C1" stroke-width="2.5" stroke-linecap="round"/>
+
+            <!-- Floating mini sparkles around cat -->
+            <g class="cat-sparkles">
+              <text x="35" y="65" class="floating-sparkle" font-size="16">✨</text>
+              <text x="155" y="70" class="floating-sparkle delay-1" font-size="16">💖</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Main Romantic Question -->
+      <div class="question-wrapper">
+        <h1 class="main-title" id="questionTitle">
+          Do You Love Me ? <span class="cat-emoji">😼</span>
+        </h1>
+        <p class="subtitle-pill" id="reactionSubtitle">
+          Choose wisely... your heart knows the answer! 💕
+        </p>
+      </div>
+
+      <!-- Action Arena (Buttons) -->
+      <div class="buttons-arena" id="buttonsArena">
+        <!-- Yes Button (Expands dynamically) -->
+        <button class="btn btn-yes" id="btnYes">
+          <span class="btn-text" id="yesBtnText">Yes! Absolutely! 🥰</span>
+          <span class="btn-glow"></span>
+        </button>
+
+        <!-- No Button (Evasive) -->
+        <button class="btn btn-no" id="btnNo">
+          <span class="btn-text" id="noBtnText">No 😿</span>
+        </button>
+      </div>
+
+      <!-- Playful Hints / Footer -->
+      <div class="card-footer">
+        <span class="attempts-counter" id="attemptsCounter">Attempted escapes: 0</span>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Celebration Modal / Fullscreen View -->
+  <section class="celebration-view" id="celebrationView" aria-hidden="true">
+    <canvas id="celebrationCanvas"></canvas>
+    
+    <div class="celebration-content glass-panel">
+      <div class="celebration-header">
+        <div class="celebration-badge">✨ FOREVER & ALWAYS ✨</div>
+        <h1 class="celebration-title">YAAAY! I KNEW IT! 🥰💖</h1>
+        <p class="celebration-subtitle">You just made me the happiest person in the entire universe! 🌎❤️</p>
+      </div>
+
+      <!-- Animated Love Sticker -->
+      <div class="couple-illustration">
+        <div class="heart-pulse-box">
+          <span class="big-heart-icon">💖</span>
+          <span class="kiss-cats">😻👩‍❤️‍💋‍👨😻</span>
+        </div>
+      </div>
+
+      <!-- Interactive 3D Love Letter Envelope -->
+      <div class="envelope-section">
+        <div class="envelope-container" id="envelopeContainer">
+          <div class="envelope-wrapper" id="envelopeWrapper">
+            <!-- Envelope Front & Flap -->
+            <div class="envelope-back"></div>
+            
+            <!-- Letter Sheet Inside -->
+            <div class="letter-sheet" id="letterSheet">
+              <div class="letter-inner">
+                <div class="letter-date" id="letterDate">Today & Forever</div>
+                <h3 class="letter-salutation" id="letterTo">My Dearest Love,</h3>
+                <p class="letter-body" id="letterBody">
+                  From the moment you entered my life, everything became so much brighter, sweeter, and full of joy. 
+                  No matter how fast that "No" button tried to run, my heart always knew you'd choose us.
+                  <br><br>
+                  I love your laugh, your sweet smile, and every little moment we share together. Thank you for being my favorite person in the world.
+                </p>
+                <div class="letter-signature" id="letterFrom">With all my love forever and ever, ❤️</div>
+              </div>
+            </div>
+
+            <!-- Envelope Front with Flap & Seal -->
+            <div class="envelope-front"></div>
+            <div class="envelope-flap" id="envelopeFlap">
+              <div class="wax-seal" id="waxSeal">
+                <span>💌</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="open-letter-btn" id="openLetterBtn">
+          <span>💌 Click to Open Love Letter</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Customization Modal -->
+  <div class="modal-backdrop" id="customizerModal" aria-hidden="true">
+    <div class="modal-card glass-panel">
+      <div class="modal-header">
+        <h2>Personalize Your Proposal 💖</h2>
+        <button class="modal-close" id="closeModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <label>
+          Her Name / Nickname:
+          <input type="text" id="inputHerName" placeholder="e.g. My Princess / Sweetheart" maxlength="30">
+        </label>
+        <label>
+          Your Name:
+          <input type="text" id="inputYourName" placeholder="e.g. Your Love" maxlength="30">
+        </label>
+        <label>
+          Love Letter Message:
+          <textarea id="inputLoveMessage" rows="4" placeholder="Write something sweet from your heart..."></textarea>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="resetDefaultsBtn">Reset</button>
+        <button class="btn btn-secondary" id="copyLinkBtn">📋 Copy Link</button>
+        <button class="btn btn-primary" id="saveCustomBtn">Save & Apply ✨</button>
+      </div>
+      <p class="shareable-tip">💡 Tip: You can copy the generated URL to send to her with these personalized names!</p>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-message" id="toastMessage"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

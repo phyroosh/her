@@ -89,33 +89,92 @@
     }
   }
 
-  function playTone(freq, type = 'sine', duration = 0.2, gainValue = 0.15) {
+  // Mouse click sound for 'Yes' button
+  const mouseClickAudio = new Audio('assets/mouse_click.mp3');
+  mouseClickAudio.preload = 'auto';
+
+  function playMouseClickSound() {
+    if (!state.soundEnabled) return;
+    try {
+      mouseClickAudio.currentTime = 0;
+      mouseClickAudio.play().catch(() => {});
+    } catch (e) {}
+  }
+
+  // ============================================================
+  // GENTLE MUSIC FOR LOVE LETTER (Tender Music Box / Celesta Chimes)
+  // ============================================================
+  let letterMusicTimers = [];
+
+  function stopGentleLetterMusic() {
+    letterMusicTimers.forEach(t => clearTimeout(t));
+    letterMusicTimers = [];
+  }
+
+  function playMusicBoxChime(freq, duration = 1.4) {
+    if (!audioCtx) return;
+    try {
+      const t = audioCtx.currentTime;
+      // Fundamental warm sine wave
+      const osc1 = audioCtx.createOscillator();
+      const gain1 = audioCtx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(freq, t);
+
+      // Delicate celestial harmonic (shimmer)
+      const osc2 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(freq * 2, t);
+
+      gain1.gain.setValueAtTime(0.001, t);
+      gain1.gain.linearRampToValueAtTime(0.10, t + 0.02);
+      gain1.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+
+      gain2.gain.setValueAtTime(0.001, t);
+      gain2.gain.linearRampToValueAtTime(0.035, t + 0.02);
+      gain2.gain.exponentialRampToValueAtTime(0.0001, t + duration * 0.7);
+
+      osc1.connect(gain1);
+      gain1.connect(audioCtx.destination);
+      osc2.connect(gain2);
+      gain2.connect(audioCtx.destination);
+
+      osc1.start(t);
+      osc1.stop(t + duration);
+      osc2.start(t);
+      osc2.stop(t + duration);
+    } catch (e) {}
+  }
+
+  function playGentleLetterMusic() {
     if (!state.soundEnabled) return;
     initAudio();
     if (!audioCtx) return;
 
-    try {
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
+    stopGentleLetterMusic();
 
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    // Tender, dreamy music box melody that gently unfolds with the love letter
+    const melody = [
+      { f: 523.25, time: 0.00, dur: 1.4 }, // C5
+      { f: 659.25, time: 0.28, dur: 1.4 }, // E5
+      { f: 783.99, time: 0.56, dur: 1.4 }, // G5
+      { f: 987.77, time: 0.88, dur: 1.6 }, // B5
+      { f: 1046.50, time: 1.25, dur: 1.8 }, // C6
+      { f: 880.00, time: 1.65, dur: 1.5 }, // A5
+      { f: 783.99, time: 2.05, dur: 1.6 }, // G5
+      { f: 659.25, time: 2.50, dur: 1.8 }, // E5
+      { f: 587.33, time: 3.00, dur: 2.0 }, // D5
+      { f: 523.25, time: 3.50, dur: 2.5 }  // C5 (peaceful resolution)
+    ];
 
-      gain.gain.setValueAtTime(gainValue, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      osc.start();
-      osc.stop(audioCtx.currentTime + duration);
-    } catch (e) {
-      console.warn("Audio play issue", e);
-    }
-  }
-
-  function playPopSound() {
-    playTone(520, 'sine', 0.12, 0.12);
+    melody.forEach(note => {
+      const timer = setTimeout(() => {
+        if (!state.soundEnabled || !audioCtx) return;
+        playMusicBoxChime(note.f, note.dur);
+      }, note.time * 1000);
+      letterMusicTimers.push(timer);
+    });
   }
 
   function playHeartBreakSound() {
@@ -124,58 +183,21 @@
     if (!audioCtx) return;
 
     try {
-      // Descending minor chord
       const notes = [440, 415, 370, 330];
       notes.forEach((freq, idx) => {
         setTimeout(() => {
-          playTone(freq, 'triangle', 0.25, 0.1);
+          if (!state.soundEnabled || !audioCtx) return;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.25);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.25);
         }, idx * 75);
-      });
-    } catch (e) {}
-  }
-
-  function playWhooshSound() {
-    if (!state.soundEnabled) return;
-    initAudio();
-    if (!audioCtx) return;
-
-    try {
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(650, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(220, audioCtx.currentTime + 0.18);
-
-      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.18);
-
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.18);
-    } catch (e) {}
-  }
-
-  function playCelebrationFanfare() {
-    if (!state.soundEnabled) return;
-    initAudio();
-    if (!audioCtx) return;
-
-    try {
-      // Romantic celestial arpeggio (C Major 9 / F Major chords)
-      const arpeggio = [
-        { f: 523.25, d: 0.18, t: 0 },    // C5
-        { f: 659.25, d: 0.18, t: 120 },  // E5
-        { f: 783.99, d: 0.22, t: 240 },  // G5
-        { f: 987.77, d: 0.26, t: 360 },  // B5
-        { f: 1046.50, d: 0.45, t: 480 }, // C6
-        { f: 1318.51, d: 0.65, t: 620 }  // E6
-      ];
-
-      arpeggio.forEach(note => {
-        setTimeout(() => {
-          playTone(note.f, 'sine', note.d, 0.18);
-        }, note.t);
       });
     } catch (e) {}
   }
@@ -309,8 +331,6 @@
     // Throttle to 180ms to let the smooth glide animation play
     if (now - state.lastEvadeTime < 180) return;
     state.lastEvadeTime = now;
-
-    playWhooshSound();
 
     const btn = elements.btnNo;
     if (!btn.classList.contains('evasive')) {
@@ -510,11 +530,11 @@
   // CELEBRATION ON 'YES' CLICK
   // ============================================================
   elements.btnYes.addEventListener('click', () => {
+    playMouseClickSound();
     triggerCelebration();
   });
 
   function triggerCelebration() {
-    playCelebrationFanfare();
     setCatMood('love');
 
     // Show celebration modal
@@ -529,14 +549,15 @@
   // INTERACTIVE LOVE LETTER ENVELOPE
   // ============================================================
   function toggleLoveLetter() {
-    playPopSound();
     const isOpened = elements.letterSheet.classList.contains('opened');
 
     if (isOpened) {
+      stopGentleLetterMusic();
       elements.letterSheet.classList.remove('opened');
       elements.envelopeFlap.classList.remove('opened');
       elements.openLetterBtn.innerHTML = "<span>💌 Click to Open Love Letter</span>";
     } else {
+      playGentleLetterMusic();
       elements.envelopeFlap.classList.add('opened');
       setTimeout(() => {
         elements.letterSheet.classList.add('opened');
@@ -576,6 +597,7 @@
     elements.celebrationView.setAttribute('aria-hidden', 'true');
 
     // Close letter if open
+    stopGentleLetterMusic();
     elements.letterSheet.classList.remove('opened');
     elements.envelopeFlap.classList.remove('opened');
     elements.openLetterBtn.innerHTML = "<span>💌 Click to Open Love Letter</span>";
@@ -848,7 +870,10 @@
     state.soundEnabled = !state.soundEnabled;
     elements.soundIcon.textContent = state.soundEnabled ? '🔊' : '🔇';
     if (state.soundEnabled) {
-      playTone(523.25, 'sine', 0.2, 0.15);
+      initAudio();
+      playMusicBoxChime(523.25, 0.6);
+    } else {
+      stopGentleLetterMusic();
     }
   });
 

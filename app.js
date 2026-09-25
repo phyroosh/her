@@ -851,13 +851,8 @@
 
     }
 
-    if (state.yourName) {
-      elements.letterFrom.textContent = `With all my love forever and ever, ${escapeHtml(state.yourName)} ❤️`;
-
-    } else {
-      elements.letterFrom.textContent = `With all my love forever and ever, Piyush ❤️`;
-
-    }
+    const sender = state.yourName ? escapeHtml(state.yourName) : 'Piyush';
+    elements.letterFrom.innerHTML = `With all my love,<br><span class="signature-name">~ ${sender} ❤️</span>`;
 
     if (state.customMessage) {
       elements.letterBody.innerHTML = escapeHtml(state.customMessage).replace(/\n/g, '<br>');

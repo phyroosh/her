@@ -538,7 +538,7 @@ body {
   position: relative;
   perspective: 900px;
   cursor: pointer;
-  margin-bottom: 32px;
+  margin-bottom: 36px;
   transition: transform 0.3s ease;
 }
 
@@ -588,8 +588,8 @@ body {
 }
 
 .letter-sheet.opened {
-  transform: translateY(-185px) scale(1.04);
-  height: 380px;
+  transform: translateY(-190px) scale(1.04);
+  height: 385px;
   z-index: 10;
   overflow-y: auto;
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.22);
@@ -619,10 +619,19 @@ body {
 
 .letter-signature {
   font-family: 'Caveat', cursive;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: #c9184a;
   text-align: right;
+  margin-top: 4px;
+  line-height: 1.25;
+}
+
+.signature-name {
+  display: inline-block;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #c9184a;
   margin-top: 2px;
 }
 

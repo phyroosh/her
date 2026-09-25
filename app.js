@@ -31,17 +31,9 @@
     lastEvadeTime: 0
   };
 
-  // Teasing messages cycling during evasions
+  // Teasing message during evasions
   const teasingMessages = [
-    "Nice try! You're stuck with me forever! 😜💕",
-    "Oops! Too slow, cutie! 🏃‍♀️💨",
-    "Resistance is futile, just click YES! 🥰",
-    "Look how irresistible that YES button is! 👉👈",
-    "You know in your heart you love me! 💖✨",
-    "The cat has declared: 'No' is strictly illegal! 🐾",
-    "You can run, but you can't escape my cuddles! 😘",
-    "Destiny has already chosen YES for you! 🌟",
-    "Are you really still trying to click that?! 🥺💖"
+    "Oops! Too slow, cutie! 🏃‍♀️💨"
   ];
 
   // --- DOM ELEMENT REFERENCES ---

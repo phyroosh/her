@@ -202,6 +202,35 @@ body {
   100% { transform: scale(1) rotate(0deg); }
 }
 
+.lives-card.no-lives {
+  background: rgba(255, 238, 243, 0.96);
+  border-color: #ff4d6d;
+  box-shadow: 0 8px 24px rgba(255, 51, 102, 0.25);
+  animation: noLivesPulse 1.8s ease-in-out infinite;
+}
+
+.no-chances-badge {
+  color: #ff2a5f;
+  font-weight: 800;
+  font-size: 0.92rem;
+  letter-spacing: 0.4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@keyframes noLivesPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 14px rgba(255, 51, 102, 0.2);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 6px 22px rgba(255, 51, 102, 0.45);
+  }
+}
+
+
 
 /* ================= MAIN CONTAINER ================= */
 .main-container {
@@ -385,9 +414,8 @@ body {
   background: linear-gradient(135deg, #ff3366 0%, #ff6b8b 50%, #ff8da1 100%);
   color: #ffffff;
   box-shadow: 0 10px 28px rgba(255, 51, 102, 0.4), 0 0 0 0 rgba(255, 51, 102, 0.4);
-  transform: scale(var(--yes-scale));
-  transform-origin: center center;
-  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.35s ease;
+  transform: none;
+  transition: transform 0.2s ease, box-shadow 0.35s ease;
   position: relative;
   z-index: 15;
   animation: pulseGlow 2.5s infinite;
@@ -406,12 +434,12 @@ body {
 }
 
 .btn-yes:hover {
-  transform: scale(calc(var(--yes-scale) * 1.06)) translateY(-2px);
+  transform: translateY(-2px);
   background: linear-gradient(135deg, #ff1a53 0%, #ff5277 50%, #ff758c 100%);
 }
 
 .btn-yes:active {
-  transform: scale(calc(var(--yes-scale) * 0.97));
+  transform: translateY(1px);
 }
 
 /* NO BUTTON */
@@ -447,6 +475,34 @@ body {
   60% { transform: rotate(-5deg); }
   80% { transform: rotate(5deg); }
 }
+
+/* Surrender mode: No button morphs into a YES button */
+.btn-no.btn-surrender-yes {
+  background: linear-gradient(135deg, #ff3366 0%, #ff6b8b 100%) !important;
+  color: #ffffff !important;
+  border-color: #ff99ac !important;
+  box-shadow: 0 8px 25px rgba(255, 51, 102, 0.45) !important;
+  animation: surrenderPulse 1.8s infinite ease-in-out !important;
+  cursor: pointer !important;
+}
+
+@keyframes surrenderPulse {
+  0%, 100% {
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(255, 51, 102, 0.4);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 10px 30px rgba(255, 51, 102, 0.65);
+  }
+}
+
+@keyframes catSurpriseBounce {
+  0%, 100% { transform: scale(1) translateY(0); }
+  30% { transform: scale(1.15) translateY(-9px); }
+  60% { transform: scale(0.96) translateY(2px); }
+}
+
 
 
 
@@ -768,6 +824,20 @@ body {
 
 
 /* ================= MOBILE OPTIMIZATIONS ================= */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  .btn-yes {
+    transform: none !important;
+    max-width: 90% !important;
+  }
+
+  .btn-yes:hover {
+    transform: translateY(-1px) !important;
+  }
+  .btn-yes:active {
+    transform: translateY(1px) !important;
+  }
+}
+
 @media (max-width: 480px) {
   .top-bar {
     padding: 0 16px;
@@ -789,18 +859,27 @@ body {
   }
 
   .buttons-arena {
-    min-height: 140px;
-    gap: 14px;
+    min-height: 160px;
+    gap: 16px;
   }
 
   .btn-yes {
-    padding: 14px 28px;
-    font-size: 1.15rem;
+    padding: 13px 26px;
+    font-size: 1.12rem;
+    transform: none !important;
+    max-width: 90% !important;
+  }
+
+  .btn-yes:hover {
+    transform: translateY(-1px) !important;
+  }
+  .btn-yes:active {
+    transform: translateY(1px) !important;
   }
 
   .btn-no {
-    padding: 12px 24px;
-    font-size: 1rem;
+    padding: 12px 22px;
+    font-size: 0.98rem;
   }
 
   .celebration-content {

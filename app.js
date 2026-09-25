@@ -22,6 +22,7 @@
   const state = {
     lives: 2,
     attempts: 0,
+    postLivesTaps: 0,
     isEvasive: !isMobileMode(), // True on Desktop (hover evasion from start), false on Mobile (2 hearts game)
     yesScale: 1.0,
     soundEnabled: true,
@@ -40,6 +41,8 @@
   const elements = {
     heart1: document.getElementById('heart1'),
     heart2: document.getElementById('heart2'),
+    heartsWrapper: document.getElementById('heartsWrapper'),
+    noChancesBadge: document.getElementById('noChancesBadge'),
     livesCard: document.getElementById('livesCard'),
     btnYes: document.getElementById('btnYes'),
     btnNo: document.getElementById('btnNo'),
@@ -227,26 +230,44 @@
   // ============================================================
   // GAME MECHANICS: LIVES (Mobile only) & EVASION (Desktop & post-lives mobile)
   // ============================================================
-  function handleNoClick(e) {
+  function handleNoClick(e, touchX, touchY) {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
 
-    state.attempts++;
+    // If the button has already surrendered into YES, clicking it triggers the celebration!
+    if (elements.btnNo.classList.contains('btn-surrender-yes')) {
+      playMouseClickSound();
+      triggerCelebration();
+      return;
+    }
 
+    state.attempts++;
 
     // On Desktop, the hearts game is not used; button only dodges!
     if (!isMobileMode()) {
-      evadeButton();
-      state.yesScale = Math.min(state.yesScale + 0.1, 2.2);
-      updateYesButtonScale();
-      const randomIndex = Math.floor(Math.random() * teasingMessages.length);
-      elements.reactionSubtitle.textContent = teasingMessages[randomIndex];
+      state.postLivesTaps++;
+      evadeButton(touchX, touchY);
+      elements.reactionSubtitle.textContent = teasingMessages[0];
+
+      const desktopTexts = [
+        "No 😿",
+        "Can't catch me! 💨",
+        "Still trying? 🥺",
+        "Too fast! 😜",
+        "Just say YES! 🙈"
+      ];
+      const textIdx = Math.min(state.postLivesTaps, desktopTexts.length - 1);
+      elements.noBtnText.textContent = desktopTexts[textIdx];
       return;
     }
 
     // On Mobile: 2-Heart Game Mechanic
+    // NEVER scale the YES button on mobile screens!
+    state.yesScale = 1.0;
+    updateYesButtonScale();
+
     if (state.lives === 2) {
       state.lives = 1;
       elements.heart1.classList.remove('alive');
@@ -254,14 +275,13 @@
       playHeartBreakSound();
       setCatMood('pleading');
 
-      // Update dialogue & scale Yes
-      elements.reactionSubtitle.textContent = "Wait... are you sure?! Please think carefully! 🥺💔";
-      state.yesScale = 1.25;
-      updateYesButtonScale();
+      // Update button text & dialogue
+      elements.noBtnText.textContent = "Think again! 🥺";
+      elements.reactionSubtitle.textContent = teasingMessages[0];
 
       // Quick playful nudge
       elements.btnNo.style.animation = 'cuteWiggle 0.5s ease';
-      setTimeout(() => elements.btnNo.style.animation = '', 500);
+      setTimeout(() => { if (elements.btnNo) elements.btnNo.style.animation = ''; }, 500);
 
     } else if (state.lives === 1) {
       state.lives = 0;
@@ -270,30 +290,60 @@
       playHeartBreakSound();
       setCatMood('shocked');
 
-      // Trigger evasive mode on mobile after losing both hearts!
+      // Surprise reaction on cat
+      if (elements.catWrapper) {
+        elements.catWrapper.style.animation = 'catSurpriseBounce 0.6s ease';
+        setTimeout(() => { if (elements.catWrapper) elements.catWrapper.style.animation = ''; }, 600);
+      }
+
+      // Creative change 1: Top chances badge updates to "0 Left! 🔒"
+      if (elements.livesCard) elements.livesCard.classList.add('no-lives');
+      if (elements.heartsWrapper) elements.heartsWrapper.style.display = 'none';
+      if (elements.noChancesBadge) elements.noChancesBadge.style.display = 'inline-flex';
+
+      // Creative change 2: No button enters evasive mode with playful text
       state.isEvasive = true;
       elements.btnNo.classList.add('evasive');
-      elements.reactionSubtitle.textContent = "🚨 System Alert: 'No' revoked! The universe insists on YES! 🙀";
-      state.yesScale = 1.5;
-      updateYesButtonScale();
+      elements.noBtnText.textContent = "Wait, what?! 🙀";
+      elements.reactionSubtitle.textContent = teasingMessages[0];
 
-      // Instantly dodge away!
-      evadeButton();
+      // Instantly dodge away to safe spot
+      evadeButton(touchX, touchY);
 
     } else {
-      // Already 0 lives on Mobile - hyper-evasive dodge
-      evadeButton();
-      state.yesScale = Math.min(state.yesScale + 0.1, 2.2);
-      updateYesButtonScale();
+      // Already 0 lives on Mobile - hyper-evasive dodge with creative text progression
+      state.postLivesTaps++;
+      elements.reactionSubtitle.textContent = teasingMessages[0];
 
-      // Pick a random tease
-      const randomIndex = Math.floor(Math.random() * teasingMessages.length);
-      elements.reactionSubtitle.textContent = teasingMessages[randomIndex];
+      if (state.postLivesTaps === 1) {
+        elements.noBtnText.textContent = "Can't catch me! 💨";
+        evadeButton(touchX, touchY);
+      } else if (state.postLivesTaps === 2) {
+        elements.noBtnText.textContent = "Still trying? 🥺";
+        evadeButton(touchX, touchY);
+      } else if (state.postLivesTaps === 3) {
+        elements.noBtnText.textContent = "Too fast! 😜";
+        evadeButton(touchX, touchY);
+      } else if (state.postLivesTaps === 4) {
+        elements.noBtnText.textContent = "Just say YES! 🙈";
+        evadeButton(touchX, touchY);
+      } else {
+        // Creative surrender: No button transforms into a second glowing YES button!
+        elements.noBtnText.textContent = "Okay, YES! 🥰💖";
+        elements.btnNo.classList.remove('evasive');
+        elements.btnNo.classList.add('btn-surrender-yes');
+        const r = elements.btnNo.getBoundingClientRect();
+        spawnEvadeDust(r.left + r.width / 2, r.top + r.height / 2);
+      }
     }
   }
 
   function updateYesButtonScale() {
-    document.documentElement.style.setProperty('--yes-scale', state.yesScale);
+    state.yesScale = 1.0;
+    document.documentElement.style.setProperty('--yes-scale', '1');
+    if (elements.btnYes) {
+      elements.btnYes.style.transform = '';
+    }
   }
 
   // Helper: Detect if cursor is hovering over or approaching the YES button
@@ -330,6 +380,8 @@
     state.lastEvadeTime = now;
 
     const btn = elements.btnNo;
+    if (!btn || btn.classList.contains('btn-surrender-yes')) return;
+
     if (!btn.classList.contains('evasive')) {
       btn.classList.add('evasive');
     }
@@ -347,28 +399,59 @@
     const origLeft = btnRect.left - currentNoX;
     const origTop = btnRect.top - currentNoY;
 
-    // Allowed translation offsets to stay strictly within proposalCard
+    // Allowed horizontal translation offsets to stay strictly within proposalCard
     const pad = 16;
     const minDx = (cardRect.left + pad) - origLeft;
     const maxDx = (cardRect.right - pad - btnWidth) - origLeft;
-    const minDy = (cardRect.top + 130) - origTop; // Keep below cat mascot
-    const maxDy = (cardRect.bottom - pad - btnHeight) - origTop;
 
-    if (maxDx <= minDx || maxDy <= minDy) return;
+    // Vertical bounds: MUST stay strictly below the subtitle pill!
+    const subRect = elements.reactionSubtitle ? elements.reactionSubtitle.getBoundingClientRect() : null;
+    const minAllowedTop = subRect ? (subRect.bottom + 12) : (cardRect.top + 200);
+    let minDy = minAllowedTop - origTop;
+    let maxDy = (cardRect.bottom - pad - btnHeight) - origTop;
 
-    // Collision check with YES button
-    const yesRect = elements.btnYes.getBoundingClientRect();
-    const margin = 16;
+    if (maxDy < minDy) {
+      minDy = Math.min(minDy, maxDy - 8);
+    }
 
-    function overlapsYes(testDx, testDy) {
-      const testLeft = origLeft + testDx;
-      const testTop = origTop + testDy;
-      return (
-        testLeft < yesRect.right + margin &&
-        testLeft + btnWidth > yesRect.left - margin &&
-        testTop < yesRect.bottom + margin &&
-        testTop + btnHeight > yesRect.top - margin
-      );
+    if (maxDx <= minDx) return;
+
+    // Strict collision check with YES button AND Subtitle pill
+    const yesRect = elements.btnYes ? elements.btnYes.getBoundingClientRect() : null;
+
+    function hasCollision(candDx, candDy) {
+      const testLeft = origLeft + candDx;
+      const testTop = origTop + candDy;
+      const testRight = testLeft + btnWidth;
+      const testBottom = testTop + btnHeight;
+
+      // Check Yes button collision with generous margin
+      if (yesRect) {
+        const margin = 26;
+        if (
+          testLeft < yesRect.right + margin &&
+          testRight > yesRect.left - margin &&
+          testTop < yesRect.bottom + margin &&
+          testBottom > yesRect.top - margin
+        ) {
+          return true;
+        }
+      }
+
+      // Check Subtitle pill collision with generous margin
+      if (subRect) {
+        const subMargin = 16;
+        if (
+          testLeft < subRect.right + subMargin &&
+          testRight > subRect.left - subMargin &&
+          testTop < subRect.bottom + subMargin &&
+          testBottom > subRect.top - subMargin
+        ) {
+          return true;
+        }
+      }
+
+      return false;
     }
 
     // Determine angle away from cursor
@@ -382,8 +465,8 @@
       baseAngle = Math.random() * Math.PI * 2;
     }
 
-    // Moderate step size (75px - 110px) for local, smooth gliding
-    const step = 75 + Math.random() * 35;
+    // Moderate step size (65px - 100px) for local, smooth gliding
+    const step = 65 + Math.random() * 35;
 
     // Test angles away from cursor first
     const angleOffsets = [0, 0.45, -0.45, 0.9, -0.9, 1.4, -1.4, 2.0, -2.0, Math.PI];
@@ -398,7 +481,7 @@
       if (
         candDx >= minDx && candDx <= maxDx &&
         candDy >= minDy && candDy <= maxDy &&
-        !overlapsYes(candDx, candDy)
+        !hasCollision(candDx, candDy)
       ) {
         bestX = candDx;
         bestY = candDy;
@@ -409,10 +492,10 @@
     // Fallback: pick any safe spot inside card that maximizes distance from cursor
     if (bestX === null || bestY === null) {
       let maxDist = -1;
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 40; i++) {
         const randDx = Math.floor(Math.random() * (maxDx - minDx)) + minDx;
         const randDy = Math.floor(Math.random() * (maxDy - minDy)) + minDy;
-        if (!overlapsYes(randDx, randDy)) {
+        if (!hasCollision(randDx, randDy)) {
           const testLeft = origLeft + randDx;
           const testTop = origTop + randDy;
           const d = (typeof cursorX === 'number')
@@ -470,6 +553,7 @@
   // Proximity detection for Desktop
   document.addEventListener('mousemove', (e) => {
     if (!state.isEvasive) return;
+    if (elements.btnNo.classList.contains('btn-surrender-yes')) return;
 
     // 1. NEVER EVADE IF CURSOR IS NEAR OR HOVERING ON YES BUTTON
     if (isCursorOnYes(e.clientX, e.clientY)) {
@@ -484,44 +568,42 @@
 
     if (dist < 40) {
       evadeButton(e.clientX, e.clientY);
-      // Gentle enlargement of YES button
-      state.yesScale = Math.min(state.yesScale + 0.07, 2.2);
-      updateYesButtonScale();
       state.attempts++;
-
-      const msg = teasingMessages[Math.floor(Math.random() * teasingMessages.length)];
-      elements.reactionSubtitle.textContent = msg;
+      elements.reactionSubtitle.textContent = teasingMessages[0];
     }
   });
 
-  // Mobile / Touch handling: dodge instantly on touchstart or pointerdown
+  // Mobile / Touch handling: clean unified touch handler with duplicate click debounce
+  let lastTouchTime = 0;
+
   elements.btnNo.addEventListener('touchstart', (e) => {
-    if (state.isEvasive) {
-      e.preventDefault();
-      const touch = e.touches[0];
-      evadeButton(touch ? touch.clientX : undefined, touch ? touch.clientY : undefined);
-      state.yesScale = Math.min(state.yesScale + 0.1, 2.2);
-      updateYesButtonScale();
-      state.attempts++;
-    } else {
-      handleNoClick(e);
-    }
+    e.preventDefault();
+    lastTouchTime = Date.now();
+    const touch = e.touches && e.touches[0];
+    handleNoClick(e, touch ? touch.clientX : undefined, touch ? touch.clientY : undefined);
   }, { passive: false });
 
   elements.btnNo.addEventListener('mouseenter', (e) => {
     if (state.isEvasive) {
+      if (elements.btnNo.classList.contains('btn-surrender-yes')) return;
       if (isCursorOnYes(e.clientX, e.clientY)) return;
       evadeButton(e.clientX, e.clientY);
-      state.yesScale = Math.min(state.yesScale + 0.07, 2.2);
-      updateYesButtonScale();
       state.attempts++;
-
-      const msg = teasingMessages[Math.floor(Math.random() * teasingMessages.length)];
-      elements.reactionSubtitle.textContent = msg;
+      elements.reactionSubtitle.textContent = teasingMessages[0];
     }
   });
 
-  elements.btnNo.addEventListener('click', handleNoClick);
+  elements.btnNo.addEventListener('click', (e) => {
+    // Prevent synthetic duplicate click on touch devices
+    if (Date.now() - lastTouchTime < 450) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      return;
+    }
+    handleNoClick(e);
+  });
 
   // ============================================================
   // CELEBRATION ON 'YES' CLICK
@@ -570,7 +652,8 @@
   function resetGame() {
     state.lives = 2;
     state.attempts = 0;
-    state.isEvasive = false;
+    state.postLivesTaps = 0;
+    state.isEvasive = !isMobileMode();
     state.yesScale = 1.0;
 
     elements.heart1.classList.remove('shattered');
@@ -578,7 +661,13 @@
     elements.heart2.classList.remove('shattered');
     elements.heart2.classList.add('alive');
 
+    if (elements.livesCard) elements.livesCard.classList.remove('no-lives');
+    if (elements.heartsWrapper) elements.heartsWrapper.style.display = 'flex';
+    if (elements.noChancesBadge) elements.noChancesBadge.style.display = 'none';
+
+    elements.noBtnText.textContent = "No 😿";
     elements.btnNo.classList.remove('evasive');
+    elements.btnNo.classList.remove('btn-surrender-yes');
     elements.btnNo.style.transform = '';
     currentNoX = 0;
     currentNoY = 0;
@@ -863,7 +952,28 @@
 
 
 
-  // Initialize custom settings on boot
+  // Initialize scale and custom settings on boot
+  updateYesButtonScale();
   loadCustomSettings();
+
+  window.addEventListener('resize', () => {
+    updateYesButtonScale();
+  });
+
+  // URL automation helper for testing/previewing states
+  function checkAutoSteps() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const steps = parseInt(urlParams.get('autoSteps') || '0', 10);
+    if (steps > 0) {
+      setTimeout(async () => {
+        for (let i = 0; i < steps; i++) {
+          handleNoClick();
+          await new Promise(r => setTimeout(r, 120));
+        }
+      }, 300);
+    }
+  }
+
+  checkAutoSteps();
 
 })();

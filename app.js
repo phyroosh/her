@@ -37,7 +37,6 @@
     "Oops! Too slow, cutie! 🏃‍♀️💨",
     "Resistance is futile, just click YES! 🥰",
     "Look how irresistible that YES button is! 👉👈",
-    "Error 404: 'No' button is physically unclickable! 😼",
     "You know in your heart you love me! 💖✨",
     "The cat has declared: 'No' is strictly illegal! 🐾",
     "You can run, but you can't escape my cuddles! 😘",

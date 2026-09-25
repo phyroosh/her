@@ -454,17 +454,15 @@ body {
   color: #ff477e;
   border: 2px solid #ffccd5;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
-  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
-              top 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
-              left 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
               background 0.2s ease,
               box-shadow 0.2s ease;
   z-index: 20;
+  will-change: transform;
 }
 
 .btn-no.evasive {
-  position: fixed !important;
-  box-shadow: 0 15px 35px rgba(255, 71, 126, 0.35);
+  box-shadow: 0 12px 30px rgba(255, 71, 126, 0.3);
   border-color: #ff758c;
 }
 

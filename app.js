@@ -65,10 +65,7 @@
     openLetterBtn: document.getElementById('openLetterBtn'),
     letterTo: document.getElementById('letterTo'),
     letterFrom: document.getElementById('letterFrom'),
-    letterBody: document.getElementById('letterBody'),
-
-    musicBtn: document.getElementById('musicBtn'),
-    soundIcon: document.getElementById('soundIcon')
+    letterBody: document.getElementById('letterBody')
   };
 
   // ============================================================
@@ -865,17 +862,6 @@
   }
 
 
-  // Sound Toggle Control
-  elements.musicBtn.addEventListener('click', () => {
-    state.soundEnabled = !state.soundEnabled;
-    elements.soundIcon.textContent = state.soundEnabled ? '🔊' : '🔇';
-    if (state.soundEnabled) {
-      initAudio();
-      playMusicBoxChime(523.25, 0.6);
-    } else {
-      stopGentleLetterMusic();
-    }
-  });
 
   // Initialize custom settings on boot
   loadCustomSettings();

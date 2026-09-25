@@ -57,7 +57,7 @@
     noBtnText: document.getElementById('noBtnText'),
     questionTitle: document.getElementById('questionTitle'),
     reactionSubtitle: document.getElementById('reactionSubtitle'),
-    attemptsCounter: document.getElementById('attemptsCounter'),
+
     mascotContainer: document.getElementById('mascotContainer'),
     catWrapper: document.getElementById('catWrapper'),
     catEyesNormal: document.getElementById('catEyesNormal'),
@@ -75,16 +75,7 @@
     letterTo: document.getElementById('letterTo'),
     letterFrom: document.getElementById('letterFrom'),
     letterBody: document.getElementById('letterBody'),
-    customizerBtn: document.getElementById('customizerBtn'),
-    customizerModal: document.getElementById('customizerModal'),
-    closeModalBtn: document.getElementById('closeModalBtn'),
-    saveCustomBtn: document.getElementById('saveCustomBtn'),
-    resetDefaultsBtn: document.getElementById('resetDefaultsBtn'),
-    inputHerName: document.getElementById('inputHerName'),
-    inputYourName: document.getElementById('inputYourName'),
-    inputLoveMessage: document.getElementById('inputLoveMessage'),
-    copyLinkBtn: document.getElementById('copyLinkBtn'),
-    toastMessage: document.getElementById('toastMessage'),
+
     musicBtn: document.getElementById('musicBtn'),
     soundIcon: document.getElementById('soundIcon')
   };
@@ -233,7 +224,7 @@
     }
 
     state.attempts++;
-    elements.attemptsCounter.textContent = `Attempted escapes: ${state.attempts}`;
+
 
     // On Desktop, the hearts game is not used; button only dodges!
     if (!isMobileMode()) {
@@ -301,7 +292,6 @@
   // ============================================================
   function evadeButton() {
     const now = Date.now();
-    // Throttle to prevent glitching
     if (now - state.lastEvadeTime < 110) return;
     state.lastEvadeTime = now;
 
@@ -316,28 +306,49 @@
     const btnWidth = btnRect.width || 120;
     const btnHeight = btnRect.height || 50;
 
-    // Viewport boundaries with safety padding
-    const padding = 20;
-    const topSafe = 85; // Avoid colliding with top lives bar
+    // Strict viewport boundaries — button must be FULLY visible
+    const padding = 16;
+    const topSafe = 80;
+    const minX = padding;
+    const minY = topSafe;
     const maxX = window.innerWidth - btnWidth - padding;
     const maxY = window.innerHeight - btnHeight - padding;
 
-    // Compute new position that is substantially different from current position
+    // If viewport is too small to fit the button, bail out gracefully
+    if (maxX < minX || maxY < minY) return;
+
+    // Get Yes button's bounding rect for collision avoidance
+    const yesRect = elements.btnYes.getBoundingClientRect();
+    // Add generous margin around the Yes button to prevent overlap
+    const overlapMargin = 20;
+
+    function rectsOverlap(x, y) {
+      return (
+        x < yesRect.right + overlapMargin &&
+        x + btnWidth > yesRect.left - overlapMargin &&
+        y < yesRect.bottom + overlapMargin &&
+        y + btnHeight > yesRect.top - overlapMargin
+      );
+    }
+
     let newX, newY;
     let attempts = 0;
     do {
-      newX = Math.max(padding, Math.floor(Math.random() * maxX));
-      newY = Math.max(topSafe, Math.floor(Math.random() * maxY));
+      newX = Math.floor(Math.random() * (maxX - minX)) + minX;
+      newY = Math.floor(Math.random() * (maxY - minY)) + minY;
       attempts++;
     } while (
-      attempts < 8 &&
-      Math.hypot(newX - btnRect.left, newY - btnRect.top) < 140
+      attempts < 20 &&
+      (Math.hypot(newX - btnRect.left, newY - btnRect.top) < 120 || rectsOverlap(newX, newY))
     );
+
+    // Final clamp to guarantee fully on-screen
+    newX = Math.max(minX, Math.min(newX, maxX));
+    newY = Math.max(minY, Math.min(newY, maxY));
 
     btn.style.left = `${newX}px`;
     btn.style.top = `${newY}px`;
 
-    // Spawn cute heart dust at old position
     spawnEvadeDust(btnRect.left + btnWidth / 2, btnRect.top + btnHeight / 2);
   }
 
@@ -386,7 +397,7 @@
       state.yesScale = Math.min(state.yesScale + 0.05, 3.2);
       updateYesButtonScale();
       state.attempts++;
-      elements.attemptsCounter.textContent = `Attempted escapes: ${state.attempts}`;
+  
 
       const msg = teasingMessages[Math.floor(Math.random() * teasingMessages.length)];
       elements.reactionSubtitle.textContent = msg;
@@ -401,7 +412,7 @@
       state.yesScale = Math.min(state.yesScale + 0.16, 3.2);
       updateYesButtonScale();
       state.attempts++;
-      elements.attemptsCounter.textContent = `Attempted escapes: ${state.attempts}`;
+  
     } else {
       handleNoClick(e);
     }
@@ -413,7 +424,7 @@
       state.yesScale = Math.min(state.yesScale + 0.12, 3.2);
       updateYesButtonScale();
       state.attempts++;
-      elements.attemptsCounter.textContent = `Attempted escapes: ${state.attempts}`;
+  
       const msg = teasingMessages[Math.floor(Math.random() * teasingMessages.length)];
       elements.reactionSubtitle.textContent = msg;
     }
@@ -481,7 +492,7 @@
     elements.btnNo.style.top = '';
 
     updateYesButtonScale();
-    elements.attemptsCounter.textContent = 'Attempted escapes: 0';
+
     elements.reactionSubtitle.textContent = "Choose wisely... your heart knows the answer! 💕";
 
     setCatMood('normal');
@@ -722,24 +733,24 @@
     if (state.herName) {
       elements.questionTitle.innerHTML = `Do You Love Me, ${escapeHtml(state.herName)} ? <span class="cat-emoji">😼</span>`;
       elements.letterTo.textContent = `My Dearest ${escapeHtml(state.herName)},`;
-      elements.inputHerName.value = state.herName;
+
     } else {
       elements.questionTitle.innerHTML = `Do You Love Me ? <span class="cat-emoji">😼</span>`;
       elements.letterTo.textContent = `My Dearest Love,`;
-      elements.inputHerName.value = '';
+
     }
 
     if (state.yourName) {
       elements.letterFrom.textContent = `With all my love forever and ever, ${escapeHtml(state.yourName)} ❤️`;
-      elements.inputYourName.value = state.yourName;
+
     } else {
       elements.letterFrom.textContent = `With all my love forever and ever, ❤️`;
-      elements.inputYourName.value = '';
+
     }
 
     if (state.customMessage) {
       elements.letterBody.innerHTML = escapeHtml(state.customMessage).replace(/\n/g, '<br>');
-      elements.inputLoveMessage.value = state.customMessage;
+
     }
   }
 
@@ -757,85 +768,6 @@
     });
   }
 
-  // Modal Controls
-  elements.customizerBtn.addEventListener('click', () => {
-    playPopSound();
-    elements.customizerModal.classList.add('active');
-    elements.customizerModal.setAttribute('aria-hidden', 'false');
-  });
-
-  elements.closeModalBtn.addEventListener('click', () => {
-    elements.customizerModal.classList.remove('active');
-    elements.customizerModal.setAttribute('aria-hidden', 'true');
-  });
-
-  elements.saveCustomBtn.addEventListener('click', () => {
-    playPopSound();
-    state.herName = elements.inputHerName.value.trim();
-    state.yourName = elements.inputYourName.value.trim();
-    state.customMessage = elements.inputLoveMessage.value.trim();
-
-    localStorage.setItem('proposal_herName', state.herName);
-    localStorage.setItem('proposal_yourName', state.yourName);
-    localStorage.setItem('proposal_message', state.customMessage);
-
-    // Update URL query parameters for easy sharing
-    const url = new URL(window.location);
-    if (state.herName) url.searchParams.set('to', state.herName);
-    else url.searchParams.delete('to');
-    if (state.yourName) url.searchParams.set('from', state.yourName);
-    else url.searchParams.delete('from');
-    if (state.customMessage) url.searchParams.set('msg', state.customMessage);
-    else url.searchParams.delete('msg');
-
-    window.history.replaceState({}, '', url);
-
-    applyCustomSettings();
-    elements.customizerModal.classList.remove('active');
-    elements.customizerModal.setAttribute('aria-hidden', 'true');
-  });
-
-  elements.resetDefaultsBtn.addEventListener('click', () => {
-    localStorage.removeItem('proposal_herName');
-    localStorage.removeItem('proposal_yourName');
-    localStorage.removeItem('proposal_message');
-    const url = new URL(window.location.origin + window.location.pathname);
-    window.history.replaceState({}, '', url);
-
-    state.herName = '';
-    state.yourName = '';
-    state.customMessage = '';
-    applyCustomSettings();
-    elements.customizerModal.classList.remove('active');
-    elements.customizerModal.setAttribute('aria-hidden', 'true');
-  });
-
-  // Toast Helper
-  function showToast(msg) {
-    if (!elements.toastMessage) return;
-    elements.toastMessage.textContent = msg;
-    elements.toastMessage.classList.add('show');
-    setTimeout(() => {
-      elements.toastMessage.classList.remove('show');
-    }, 2500);
-  }
-
-  // Copy Link Button
-  if (elements.copyLinkBtn) {
-    elements.copyLinkBtn.addEventListener('click', () => {
-      playPopSound();
-      const url = window.location.href;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url).then(() => {
-          showToast("💌 Shareable link copied to clipboard!");
-        }).catch(() => {
-          showToast("💌 Link is ready in your browser bar!");
-        });
-      } else {
-        showToast("💌 Link is ready in your browser bar!");
-      }
-    });
-  }
 
   // Sound Toggle Control
   elements.musicBtn.addEventListener('click', () => {

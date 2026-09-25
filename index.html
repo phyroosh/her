@@ -32,9 +32,6 @@
 
     <!-- Quick action buttons -->
     <div class="top-actions">
-      <button class="icon-btn" id="customizerBtn" title="Customize names and letter" aria-label="Customize">
-        <span>✏️</span>
-      </button>
       <button class="icon-btn" id="musicBtn" title="Toggle romantic audio" aria-label="Toggle sound">
         <span id="soundIcon">🔊</span>
       </button>
@@ -157,10 +154,6 @@
         </button>
       </div>
 
-      <!-- Playful Hints / Footer -->
-      <div class="card-footer">
-        <span class="attempts-counter" id="attemptsCounter">Attempted escapes: 0</span>
-      </div>
 
     </div>
   </main>
@@ -222,38 +215,7 @@
     </div>
   </section>
 
-  <!-- Customization Modal -->
-  <div class="modal-backdrop" id="customizerModal" aria-hidden="true">
-    <div class="modal-card glass-panel">
-      <div class="modal-header">
-        <h2>Personalize Your Proposal 💖</h2>
-        <button class="modal-close" id="closeModalBtn">&times;</button>
-      </div>
-      <div class="modal-body">
-        <label>
-          Her Name / Nickname:
-          <input type="text" id="inputHerName" placeholder="e.g. My Princess / Sweetheart" maxlength="30">
-        </label>
-        <label>
-          Your Name:
-          <input type="text" id="inputYourName" placeholder="e.g. Your Love" maxlength="30">
-        </label>
-        <label>
-          Love Letter Message:
-          <textarea id="inputLoveMessage" rows="4" placeholder="Write something sweet from your heart..."></textarea>
-        </label>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" id="resetDefaultsBtn">Reset</button>
-        <button class="btn btn-secondary" id="copyLinkBtn">📋 Copy Link</button>
-        <button class="btn btn-primary" id="saveCustomBtn">Save & Apply ✨</button>
-      </div>
-      <p class="shareable-tip">💡 Tip: You can copy the generated URL to send to her with these personalized names!</p>
-    </div>
-  </div>
 
-  <!-- Toast Notification -->
-  <div class="toast-message" id="toastMessage"></div>
 
   <script src="app.js"></script>
 </body>

@@ -114,131 +114,13 @@ body {
   z-index: 1;
 }
 
-/* ================= TOP NAVIGATION BAR ================= */
-.top-bar {
-  position: fixed;
-  top: 16px;
-  left: 0;
-  right: 0;
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 100;
-  pointer-events: auto;
-}
-
-.lives-card {
-  display: none; /* Hidden on Desktop */
-  align-items: center;
-  gap: 8px;
-  padding: 8px 18px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1.5px solid var(--glass-border);
-  border-radius: 999px;
-  box-shadow: 0 8px 20px rgba(255, 71, 126, 0.15);
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: var(--text-dark);
-  transition: transform 0.25s ease;
-}
-
-/* Shown ONLY on Mobile / Touch interfaces */
-@media (max-width: 768px), (hover: none) and (pointer: coarse) {
-  .lives-card {
-    display: inline-flex;
-  }
-}
-
-.lives-card:hover {
-  transform: translateY(-2px);
-}
-
-.lives-label {
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.hearts-wrapper {
-  display: flex;
-  gap: 6px;
-}
-
-.life-heart {
-  font-size: 1.25rem;
-  display: inline-block;
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease;
-}
-
-.life-heart.alive {
-  animation: heartPulse 1.8s ease-in-out infinite;
-}
-
-.life-heart.alive:nth-child(2) {
-  animation-delay: 0.35s;
-}
-
-.life-heart.shattered {
-  filter: grayscale(1) opacity(0.45);
-  animation: heartCrack 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
-}
-
-@keyframes heartPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.18); }
-}
-
-@keyframes heartCrack {
-  0% { transform: scale(1.4) rotate(0deg); }
-  25% { transform: scale(0.9) rotate(-15deg); }
-  50% { transform: scale(1.2) rotate(15deg); }
-  75% { transform: scale(0.95) rotate(-5deg); }
-  100% { transform: scale(1) rotate(0deg); }
-}
-
-.lives-card.no-lives {
-  background: rgba(255, 238, 243, 0.96);
-  border-color: #ff4d6d;
-  box-shadow: 0 8px 24px rgba(255, 51, 102, 0.25);
-  animation: noLivesPulse 1.8s ease-in-out infinite;
-}
-
-.no-chances-badge {
-  color: #ff2a5f;
-  font-weight: 800;
-  font-size: 0.92rem;
-  letter-spacing: 0.4px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-@keyframes noLivesPulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 4px 14px rgba(255, 51, 102, 0.2);
-  }
-  50% {
-    transform: scale(1.06);
-    box-shadow: 0 6px 22px rgba(255, 51, 102, 0.45);
-  }
-}
-
-
-
 /* ================= MAIN CONTAINER ================= */
 .main-container {
   position: relative;
   z-index: 10;
   width: 100%;
   max-width: 540px;
-  padding: 85px 20px 30px;
+  padding: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -825,6 +707,10 @@ body {
 
 /* ================= MOBILE OPTIMIZATIONS ================= */
 @media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  .subtitle-pill {
+    display: none !important;
+  }
+
   .btn-yes {
     transform: none !important;
     max-width: 90% !important;
@@ -839,13 +725,12 @@ body {
 }
 
 @media (max-width: 480px) {
-  .top-bar {
-    padding: 0 16px;
-    top: 12px;
+  .subtitle-pill {
+    display: none !important;
   }
 
   .main-container {
-    padding: 70px 14px 20px;
+    padding: 24px 14px 20px;
   }
 
   .proposal-card {

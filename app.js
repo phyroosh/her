@@ -20,10 +20,9 @@
 
   // --- APPLICATION STATE ---
   const state = {
-    lives: 2,
     attempts: 0,
     postLivesTaps: 0,
-    isEvasive: !isMobileMode(), // True on Desktop (hover evasion from start), false on Mobile (2 hearts game)
+    isEvasive: true,
     yesScale: 1.0,
     soundEnabled: true,
     herName: '',
@@ -39,11 +38,6 @@
 
   // --- DOM ELEMENT REFERENCES ---
   const elements = {
-    heart1: document.getElementById('heart1'),
-    heart2: document.getElementById('heart2'),
-    heartsWrapper: document.getElementById('heartsWrapper'),
-    noChancesBadge: document.getElementById('noChancesBadge'),
-    livesCard: document.getElementById('livesCard'),
     btnYes: document.getElementById('btnYes'),
     btnNo: document.getElementById('btnNo'),
     buttonsArena: document.getElementById('buttonsArena'),
@@ -177,30 +171,6 @@
     });
   }
 
-  function playHeartBreakSound() {
-    if (!state.soundEnabled) return;
-    initAudio();
-    if (!audioCtx) return;
-
-    try {
-      const notes = [440, 415, 370, 330];
-      notes.forEach((freq, idx) => {
-        setTimeout(() => {
-          if (!state.soundEnabled || !audioCtx) return;
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-          gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.25);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start();
-          osc.stop(audioCtx.currentTime + 0.25);
-        }, idx * 75);
-      });
-    } catch (e) {}
-  }
 
   // ============================================================
   // MASCOT EMOTION CONTROLLER
@@ -228,7 +198,7 @@
   }
 
   // ============================================================
-  // GAME MECHANICS: LIVES (Mobile only) & EVASION (Desktop & post-lives mobile)
+  // GAME MECHANICS: PURE EVASION (Unified Desktop & Mobile)
   // ============================================================
   function handleNoClick(e, touchX, touchY) {
     if (e) {
@@ -236,7 +206,7 @@
       e.stopPropagation();
     }
 
-    // If the button has already surrendered into YES, clicking it triggers the celebration!
+    // If the button has already surrendered into YES, clicking it triggers celebration!
     if (elements.btnNo.classList.contains('btn-surrender-yes')) {
       playMouseClickSound();
       triggerCelebration();
@@ -244,97 +214,40 @@
     }
 
     state.attempts++;
+    state.postLivesTaps++;
 
-    // On Desktop, the hearts game is not used; button only dodges!
-    if (!isMobileMode()) {
-      state.postLivesTaps++;
-      evadeButton(touchX, touchY);
+    // Evade to a new position inside the allowed arena
+    evadeButton(touchX, touchY);
+
+    // On Desktop only: show tease text in subtitle. On mobile: subtitle is completely hidden!
+    if (!isMobileMode() && elements.reactionSubtitle) {
       elements.reactionSubtitle.textContent = teasingMessages[0];
-
-      const desktopTexts = [
-        "No 😿",
-        "Can't catch me! 💨",
-        "Still trying? 🥺",
-        "Too fast! 😜",
-        "Just say YES! 🙈"
-      ];
-      const textIdx = Math.min(state.postLivesTaps, desktopTexts.length - 1);
-      elements.noBtnText.textContent = desktopTexts[textIdx];
-      return;
     }
 
-    // On Mobile: 2-Heart Game Mechanic
-    // NEVER scale the YES button on mobile screens!
-    state.yesScale = 1.0;
-    updateYesButtonScale();
-
-    if (state.lives === 2) {
-      state.lives = 1;
-      elements.heart1.classList.remove('alive');
-      elements.heart1.classList.add('shattered');
-      playHeartBreakSound();
+    // Cute progressive cat mood
+    if (state.postLivesTaps === 1) {
       setCatMood('pleading');
-
-      // Update button text & dialogue
-      elements.noBtnText.textContent = "Think again! 🥺";
-      elements.reactionSubtitle.textContent = teasingMessages[0];
-
-      // Quick playful nudge
-      elements.btnNo.style.animation = 'cuteWiggle 0.5s ease';
-      setTimeout(() => { if (elements.btnNo) elements.btnNo.style.animation = ''; }, 500);
-
-    } else if (state.lives === 1) {
-      state.lives = 0;
-      elements.heart2.classList.remove('alive');
-      elements.heart2.classList.add('shattered');
-      playHeartBreakSound();
+    } else if (state.postLivesTaps >= 3) {
       setCatMood('shocked');
+    }
 
-      // Surprise reaction on cat
-      if (elements.catWrapper) {
-        elements.catWrapper.style.animation = 'catSurpriseBounce 0.6s ease';
-        setTimeout(() => { if (elements.catWrapper) elements.catWrapper.style.animation = ''; }, 600);
-      }
+    const teasingTexts = [
+      "No 😿",
+      "Can't catch me! 💨",
+      "Still trying? 🥺",
+      "Too fast! 😜",
+      "Just say YES! 🙈"
+    ];
 
-      // Creative change 1: Top chances badge updates to "0 Left! 🔒"
-      if (elements.livesCard) elements.livesCard.classList.add('no-lives');
-      if (elements.heartsWrapper) elements.heartsWrapper.style.display = 'none';
-      if (elements.noChancesBadge) elements.noChancesBadge.style.display = 'inline-flex';
-
-      // Creative change 2: No button enters evasive mode with playful text
-      state.isEvasive = true;
-      elements.btnNo.classList.add('evasive');
-      elements.noBtnText.textContent = "Wait, what?! 🙀";
-      elements.reactionSubtitle.textContent = teasingMessages[0];
-
-      // Instantly dodge away to safe spot
-      evadeButton(touchX, touchY);
-
+    if (state.postLivesTaps < teasingTexts.length) {
+      elements.noBtnText.textContent = teasingTexts[state.postLivesTaps];
     } else {
-      // Already 0 lives on Mobile - hyper-evasive dodge with creative text progression
-      state.postLivesTaps++;
-      elements.reactionSubtitle.textContent = teasingMessages[0];
-
-      if (state.postLivesTaps === 1) {
-        elements.noBtnText.textContent = "Can't catch me! 💨";
-        evadeButton(touchX, touchY);
-      } else if (state.postLivesTaps === 2) {
-        elements.noBtnText.textContent = "Still trying? 🥺";
-        evadeButton(touchX, touchY);
-      } else if (state.postLivesTaps === 3) {
-        elements.noBtnText.textContent = "Too fast! 😜";
-        evadeButton(touchX, touchY);
-      } else if (state.postLivesTaps === 4) {
-        elements.noBtnText.textContent = "Just say YES! 🙈";
-        evadeButton(touchX, touchY);
-      } else {
-        // Creative surrender: No button transforms into a second glowing YES button!
-        elements.noBtnText.textContent = "Okay, YES! 🥰💖";
-        elements.btnNo.classList.remove('evasive');
-        elements.btnNo.classList.add('btn-surrender-yes');
-        const r = elements.btnNo.getBoundingClientRect();
-        spawnEvadeDust(r.left + r.width / 2, r.top + r.height / 2);
-      }
+      // Playful surrender: morph into YES!
+      elements.noBtnText.textContent = "Okay, YES! 🥰💖";
+      elements.btnNo.classList.remove('evasive');
+      elements.btnNo.classList.add('btn-surrender-yes');
+      const r = elements.btnNo.getBoundingClientRect();
+      spawnEvadeDust(r.left + r.width / 2, r.top + r.height / 2);
     }
   }
 
@@ -368,7 +281,8 @@
 
   // ============================================================
   // EVASIVE PHYSICS & DODGING ENGINE
-  // Smoothly dodges within a small bounded area inside proposalCard
+  // Desktop: wide arena per user specification
+  // Mobile: stays contained within proposalCard
   // ============================================================
   let currentNoX = 0;
   let currentNoY = 0;
@@ -399,16 +313,32 @@
     const origLeft = btnRect.left - currentNoX;
     const origTop = btnRect.top - currentNoY;
 
-    // Allowed horizontal translation offsets to stay strictly within proposalCard
-    const pad = 16;
-    const minDx = (cardRect.left + pad) - origLeft;
-    const maxDx = (cardRect.right - pad - btnWidth) - origLeft;
+    const mobile = isMobileMode();
+    let minAllowedLeft, maxAllowedRight, minAllowedTop, maxAllowedBottom;
 
-    // Vertical bounds: MUST stay strictly below the subtitle pill!
-    const subRect = elements.reactionSubtitle ? elements.reactionSubtitle.getBoundingClientRect() : null;
-    const minAllowedTop = subRect ? (subRect.bottom + 12) : (cardRect.top + 200);
+    if (mobile) {
+      // Mobile mode: keep strictly within proposal card
+      const pad = 12;
+      minAllowedLeft = cardRect.left + pad;
+      maxAllowedRight = cardRect.right - pad;
+
+      const titleRect = elements.questionTitle ? elements.questionTitle.getBoundingClientRect() : null;
+      minAllowedTop = titleRect ? (titleRect.bottom + 10) : (cardRect.top + 180);
+      maxAllowedBottom = cardRect.bottom - pad;
+    } else {
+      // Desktop mode: wide arena as marked by user (~8% to ~92% width, ~6% to ~94% height)
+      const marginX = Math.max(70, window.innerWidth * 0.08);
+      const marginY = Math.max(45, window.innerHeight * 0.06);
+      minAllowedLeft = marginX;
+      maxAllowedRight = window.innerWidth - marginX;
+      minAllowedTop = marginY;
+      maxAllowedBottom = window.innerHeight - marginY;
+    }
+
+    const minDx = minAllowedLeft - origLeft;
+    const maxDx = (maxAllowedRight - btnWidth) - origLeft;
     let minDy = minAllowedTop - origTop;
-    let maxDy = (cardRect.bottom - pad - btnHeight) - origTop;
+    let maxDy = (maxAllowedBottom - btnHeight) - origTop;
 
     if (maxDy < minDy) {
       minDy = Math.min(minDy, maxDy - 8);
@@ -416,8 +346,11 @@
 
     if (maxDx <= minDx) return;
 
-    // Strict collision check with YES button AND Subtitle pill
+    // Collision check helper
     const yesRect = elements.btnYes ? elements.btnYes.getBoundingClientRect() : null;
+    const mascotRect = (!mobile && elements.mascotContainer) ? elements.mascotContainer.getBoundingClientRect() : null;
+    const titleRect = (!mobile && elements.questionTitle) ? elements.questionTitle.getBoundingClientRect() : null;
+    const subRect = (!mobile && elements.reactionSubtitle) ? elements.reactionSubtitle.getBoundingClientRect() : null;
 
     function hasCollision(candDx, candDy) {
       const testLeft = origLeft + candDx;
@@ -425,30 +358,24 @@
       const testRight = testLeft + btnWidth;
       const testBottom = testTop + btnHeight;
 
-      // Check Yes button collision with generous margin
-      if (yesRect) {
-        const margin = 26;
-        if (
-          testLeft < yesRect.right + margin &&
-          testRight > yesRect.left - margin &&
-          testTop < yesRect.bottom + margin &&
-          testBottom > yesRect.top - margin
-        ) {
-          return true;
-        }
+      function collides(rect, margin) {
+        if (!rect) return false;
+        return (
+          testLeft < rect.right + margin &&
+          testRight > rect.left - margin &&
+          testTop < rect.bottom + margin &&
+          testBottom > rect.top - margin
+        );
       }
 
-      // Check Subtitle pill collision with generous margin
-      if (subRect) {
-        const subMargin = 16;
-        if (
-          testLeft < subRect.right + subMargin &&
-          testRight > subRect.left - subMargin &&
-          testTop < subRect.bottom + subMargin &&
-          testBottom > subRect.top - subMargin
-        ) {
-          return true;
-        }
+      // Check Yes button collision with generous margin
+      if (collides(yesRect, 28)) return true;
+
+      // On desktop, also avoid covering cat mascot, title, or subtitle pill
+      if (!mobile) {
+        if (collides(mascotRect, 14)) return true;
+        if (collides(titleRect, 14)) return true;
+        if (collides(subRect, 14)) return true;
       }
 
       return false;
@@ -465,8 +392,8 @@
       baseAngle = Math.random() * Math.PI * 2;
     }
 
-    // Moderate step size (65px - 100px) for local, smooth gliding
-    const step = 65 + Math.random() * 35;
+    // Step size: on mobile keep small (50-80px), on desktop expand for lively wide-area dodging (120-185px)
+    const step = mobile ? (55 + Math.random() * 25) : (120 + Math.random() * 65);
 
     // Test angles away from cursor first
     const angleOffsets = [0, 0.45, -0.45, 0.9, -0.9, 1.4, -1.4, 2.0, -2.0, Math.PI];
@@ -489,10 +416,10 @@
       }
     }
 
-    // Fallback: pick any safe spot inside card that maximizes distance from cursor
+    // Fallback: pick spot in allowed arena maximizing distance from cursor
     if (bestX === null || bestY === null) {
       let maxDist = -1;
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < 50; i++) {
         const randDx = Math.floor(Math.random() * (maxDx - minDx)) + minDx;
         const randDy = Math.floor(Math.random() * (maxDy - minDy)) + minDy;
         if (!hasCollision(randDx, randDy)) {
@@ -563,13 +490,15 @@
     const btn = elements.btnNo;
     const btnRect = btn.getBoundingClientRect();
 
-    // Trigger only when cursor directly approaches No button (< 40px from edge)
+    // Trigger only when cursor directly approaches No button (< 45px from edge)
     const dist = distanceToRect(e.clientX, e.clientY, btnRect);
 
-    if (dist < 40) {
+    if (dist < 45) {
       evadeButton(e.clientX, e.clientY);
       state.attempts++;
-      elements.reactionSubtitle.textContent = teasingMessages[0];
+      if (!isMobileMode() && elements.reactionSubtitle) {
+        elements.reactionSubtitle.textContent = teasingMessages[0];
+      }
     }
   });
 
@@ -589,7 +518,9 @@
       if (isCursorOnYes(e.clientX, e.clientY)) return;
       evadeButton(e.clientX, e.clientY);
       state.attempts++;
-      elements.reactionSubtitle.textContent = teasingMessages[0];
+      if (!isMobileMode() && elements.reactionSubtitle) {
+        elements.reactionSubtitle.textContent = teasingMessages[0];
+      }
     }
   });
 
@@ -650,20 +581,10 @@
 
   // Replay Game (helper retained for external resets)
   function resetGame() {
-    state.lives = 2;
     state.attempts = 0;
     state.postLivesTaps = 0;
-    state.isEvasive = !isMobileMode();
+    state.isEvasive = true;
     state.yesScale = 1.0;
-
-    elements.heart1.classList.remove('shattered');
-    elements.heart1.classList.add('alive');
-    elements.heart2.classList.remove('shattered');
-    elements.heart2.classList.add('alive');
-
-    if (elements.livesCard) elements.livesCard.classList.remove('no-lives');
-    if (elements.heartsWrapper) elements.heartsWrapper.style.display = 'flex';
-    if (elements.noChancesBadge) elements.noChancesBadge.style.display = 'none';
 
     elements.noBtnText.textContent = "No 😿";
     elements.btnNo.classList.remove('evasive');
@@ -674,7 +595,9 @@
 
     updateYesButtonScale();
 
-    elements.reactionSubtitle.textContent = "Choose wisely... your heart knows the answer! 💕";
+    if (!isMobileMode() && elements.reactionSubtitle) {
+      elements.reactionSubtitle.textContent = "Choose wisely... your heart knows the answer! 💕";
+    }
 
     setCatMood('normal');
 

@@ -538,7 +538,7 @@ body {
   position: relative;
   perspective: 900px;
   cursor: pointer;
-  margin-bottom: 14px;
+  margin-bottom: 32px;
   transition: transform 0.3s ease;
 }
 
@@ -577,7 +577,7 @@ body {
   background: #ffffff;
   background-image: repeating-linear-gradient(#ffffff, #ffffff 24px, #fce4ec 25px);
   border-radius: 8px;
-  padding: 16px 18px;
+  padding: 12px 16px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   z-index: 2;
   transition: transform 0.7s cubic-bezier(0.19, 1, 0.22, 1), height 0.7s cubic-bezier(0.19, 1, 0.22, 1), box-shadow 0.5s ease;
@@ -588,41 +588,42 @@ body {
 }
 
 .letter-sheet.opened {
-  transform: translateY(-110px) scale(1.04);
-  height: 270px;
+  transform: translateY(-185px) scale(1.04);
+  height: 380px;
   z-index: 10;
   overflow-y: auto;
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.22);
 }
 
 .letter-date {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: #ad7d88;
   text-align: right;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .letter-salutation {
   font-family: 'Playfair Display', serif;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   color: #c9184a;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .letter-body {
   font-family: 'Caveat', cursive;
-  font-size: 1.25rem;
-  line-height: 1.35;
+  font-size: 1.12rem;
+  line-height: 1.22;
   color: #44222a;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
 }
 
 .letter-signature {
   font-family: 'Caveat', cursive;
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: #c9184a;
   text-align: right;
+  margin-top: 2px;
 }
 
 /* Front triangular pocket of envelope */
@@ -682,6 +683,8 @@ body {
 }
 
 .open-letter-btn {
+  position: relative;
+  z-index: 15;
   background: #ffffff;
   border: 1.5px solid #ffccd5;
   color: var(--primary);
@@ -773,20 +776,32 @@ body {
   }
 
   .envelope-container {
-    width: 250px;
+    width: 260px;
     height: 160px;
+    margin-bottom: 24px;
   }
 
   .envelope-front {
-    border-width: 0 125px 100px 125px;
+    border-width: 0 130px 100px 130px;
   }
 
   .envelope-flap {
-    border-width: 90px 125px 0 125px;
+    border-width: 90px 130px 0 130px;
   }
 
   .letter-sheet.opened {
-    transform: translateY(-90px) scale(1.02);
-    height: 270px;
+    transform: translateY(-165px) scale(1.02);
+    height: 335px;
+  }
+
+  .letter-body {
+    font-size: 1.05rem;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  .letter-signature {
+    font-size: 1.12rem;
+    margin-top: 2px;
   }
 }

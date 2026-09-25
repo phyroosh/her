@@ -26,9 +26,10 @@
     yesScale: 1.0,
     soundEnabled: true,
     herName: '',
-    yourName: '',
+    yourName: 'Piyush',
     customMessage: '',
-    lastEvadeTime: 0
+    lastEvadeTime: 0,
+    hasLetterMusicPlayed: false
   };
 
   // Teasing message during evasions
@@ -567,7 +568,11 @@
       elements.envelopeFlap.classList.remove('opened');
       elements.openLetterBtn.innerHTML = "<span>💌 Click to Open Love Letter</span>";
     } else {
-      playGentleLetterMusic();
+      // Play gentle music ONLY for the first time she opens the letter
+      if (!state.hasLetterMusicPlayed) {
+        state.hasLetterMusicPlayed = true;
+        playGentleLetterMusic();
+      }
       elements.envelopeFlap.classList.add('opened');
       setTimeout(() => {
         elements.letterSheet.classList.add('opened');
@@ -585,6 +590,7 @@
     state.postLivesTaps = 0;
     state.isEvasive = true;
     state.yesScale = 1.0;
+    state.hasLetterMusicPlayed = false;
 
     elements.noBtnText.textContent = "No 😿";
     elements.btnNo.classList.remove('evasive');
@@ -828,7 +834,7 @@
     const savedMsg = localStorage.getItem('proposal_message');
 
     state.herName = toParam || savedTo || '';
-    state.yourName = fromParam || savedFrom || '';
+    state.yourName = fromParam || savedFrom || 'Piyush';
     state.customMessage = msgParam || savedMsg || '';
 
     applyCustomSettings();
@@ -849,7 +855,7 @@
       elements.letterFrom.textContent = `With all my love forever and ever, ${escapeHtml(state.yourName)} ❤️`;
 
     } else {
-      elements.letterFrom.textContent = `With all my love forever and ever, ❤️`;
+      elements.letterFrom.textContent = `With all my love forever and ever, Piyush ❤️`;
 
     }
 
@@ -893,6 +899,16 @@
           handleNoClick();
           await new Promise(r => setTimeout(r, 120));
         }
+      }, 300);
+    }
+
+    const openLetter = urlParams.get('openLetter');
+    if (openLetter) {
+      setTimeout(() => {
+        triggerCelebration();
+        setTimeout(() => {
+          toggleLoveLetter();
+        }, 350);
       }, 300);
     }
   }
